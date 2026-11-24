@@ -1,3 +1,4 @@
+import express from 'express'; // imported here so Vercel's Express entrypoint detection finds this file
 import mongoose from 'mongoose';
 import { config } from './config.js';
 import { createApp } from './createApp.js';
@@ -10,7 +11,7 @@ const connect = () =>
     throw e;
   }));
 
-const app = createApp({ ensureDb: (_req, _res, next) => connect().then(() => next(), next) });
+const app = createApp({ app: express(), ensureDb: (_req, _res, next) => connect().then(() => next(), next) });
 
 // On Vercel the platform runs the exported app; elsewhere (Docker, local) we listen ourselves.
 if (!process.env.VERCEL) {
