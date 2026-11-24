@@ -1,4 +1,5 @@
-# Acme Store — Support Knowledge Base
+// Knowledge base text (edit me). A JS module (not .md) so serverless bundlers include it automatically.
+export default `# Acme Store — Support Knowledge Base
 > SAMPLE CONTENT: placeholder policies for a fictional store. Replace with your real policies.
 
 ## Returns
@@ -33,3 +34,4 @@
 ## Contact a human
 - Email: support@acme-store.example
 - Hours: Monday–Friday, 9:00–17:00 (Eastern Time). Replies typically within 1 business day.
+`;

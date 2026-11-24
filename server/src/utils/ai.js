@@ -1,19 +1,6 @@
 import { createHmac } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
-
-const KB_PATH = fileURLToPath(new URL('../../knowledge/faq.md', import.meta.url));
-
-/** Load the FAQ/knowledge base text; returns '' if the file is missing (bot then just refers users to a human). */
-export function loadKnowledge(path = KB_PATH) {
-  try {
-    return readFileSync(path, 'utf8').trim();
-  } catch {
-    console.warn(`Knowledge base not found at ${path}; continuing without it.`);
-    return '';
-  }
-}
+import FAQ from '../../knowledge/faq.js';
 
 export function buildSystemPrompt(knowledge) {
   const base = [
@@ -37,7 +24,7 @@ export function buildSystemPrompt(knowledge) {
 
 // Built once at startup. Kept byte-identical across requests and placed first in the messages so that
 // providers with automatic prefix caching can reuse it.
-export const SYSTEM_PROMPT = buildSystemPrompt(loadKnowledge());
+export const SYSTEM_PROMPT = buildSystemPrompt(FAQ.trim());
 
 const RETRYABLE = (status) => status === 408 || status === 429 || status >= 500;
 

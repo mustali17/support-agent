@@ -5,11 +5,12 @@ import { config } from './config.js';
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chat.js';
 
-export function createApp({ rateLimits = true } = {}) {
+export function createApp({ rateLimits = true, ensureDb } = {}) {
   const app = express();
   app.set('trust proxy', 1); // behind nginx / hosting proxy
   app.use(cors({ origin: config.corsOrigins }));
   app.use(express.json({ limit: '20kb' }));
+  if (ensureDb) app.use(ensureDb); // serverless: (re)use a cached DB connection per request
 
   const limiter = (windowMs, max, error) =>
     rateLimits

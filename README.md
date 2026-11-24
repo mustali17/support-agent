@@ -47,7 +47,7 @@ Send `Authorization: Bearer <token>`. In Docker/dev the client reaches the API u
 
 ## Knowledge base
 
-`server/knowledge/faq.md` is loaded at startup and appended to the system prompt; the assistant answers policy
+`server/knowledge/faq.js` is loaded at startup and appended to the system prompt; the assistant answers policy
 questions only from it and says "I don't know" (and refers to a human) otherwise. The shipped file is **sample
 content for a fictional store: replace it with your real policies**. It suits a few thousand tokens; beyond ~10k tokens
 switch to retrieval (chunk + MongoDB text search) so only relevant sections are sent.

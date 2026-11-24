@@ -26,9 +26,8 @@ describe('system prompt spec', async () => {
     assert.match(SYSTEM_PROMPT, /within 30 days of delivery/);
     assert.match(SYSTEM_PROMPT, /ONLY from the COMPANY KNOWLEDGE/);
   });
-  it('loadKnowledge reads a file, and returns "" (no crash) when missing', async () => {
-    const { loadKnowledge, buildSystemPrompt } = await import('../src/utils/ai.js');
-    assert.equal(loadKnowledge('/nonexistent/faq.md'), '');
+  it('buildSystemPrompt omits the section without knowledge and includes it with', async () => {
+    const { buildSystemPrompt } = await import('../src/utils/ai.js');
     assert.doesNotMatch(buildSystemPrompt(''), /COMPANY KNOWLEDGE ===/);
     assert.match(buildSystemPrompt('Foo policy'), /Foo policy/);
   });
