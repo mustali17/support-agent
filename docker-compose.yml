@@ -1,11 +1,28 @@
 services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   server:
     build: ./server
     restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    # Later files override earlier ones: defaults make `docker compose up` work on a fresh clone;
+    # server/.env (optional) overrides them, e.g. MONGO_URI for Atlas, OPENROUTER_API_KEY, a real JWT_SECRET.
     env_file:
-      - ./server/.env   # MONGO_URI here should point to MongoDB Atlas
+      - ./server/docker.defaults.env
+      - path: ./server/.env
+        required: false
     environment:
-      NODE_ENV: production
       PORT: 5000
     ports:
       - "5000:5000"
@@ -17,3 +34,6 @@ services:
       - server
     ports:
       - "3000:80"
+
+volumes:
+  mongo-data:

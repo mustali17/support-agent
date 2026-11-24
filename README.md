@@ -2,6 +2,8 @@
 
 Full-stack chat app: JWT auth (bcrypt), AI replies via OpenRouter, per-user chat history in MongoDB.
 
+**Live demo:** https://client-beige-gamma-48.vercel.app &nbsp;·&nbsp; **API:** https://server-gamma-murex-50.vercel.app/health
+
 - **client/** React (Vite) + Axios, served by nginx in Docker
 - **server/** Node.js + Express + Mongoose
 - **Rate limiting** (express-rate-limit), typing indicator, dev/prod config via env
@@ -9,12 +11,24 @@ Full-stack chat app: JWT auth (bcrypt), AI replies via OpenRouter, per-user chat
 ## Quick start (Docker)
 
 ```bash
-cp server/.env.example server/.env
-# edit server/.env: set OPENROUTER_API_KEY (https://openrouter.ai/keys) and a strong JWT_SECRET
+git clone https://github.com/mustali17/support-agent.git && cd support-agent
 docker compose up --build
 ```
 
-Open http://localhost:3000 (API also on :5000). The server uses the `MONGO_URI` from `server/.env` (MongoDB Atlas: allow your IP under Network Access).
+Open http://localhost:3000 (API also on :5000). This works on a fresh clone with no setup: compose starts its own
+MongoDB container and uses safe local defaults from `server/docker.defaults.env`.
+
+To enable the AI, create `server/.env` (it is optional, and overrides the defaults):
+
+```bash
+cp server/.env.example server/.env
+# set OPENROUTER_API_KEY (https://openrouter.ai/keys) and a strong JWT_SECRET
+# optional: MONGO_URI=mongodb+srv://... to use MongoDB Atlas instead of the local container
+docker compose up --build
+```
+
+Without `OPENROUTER_API_KEY`, signup/login/history work but sending a message returns "AI is not configured".
+If you use Atlas, allow your IP under Network Access.
 
 ## Local development (no Docker)
 
@@ -41,8 +55,9 @@ Send `Authorization: Bearer <token>`. In Docker/dev the client reaches the API u
 
 ## Environment
 
-`server/.env.example`: `MONGO_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `OPENROUTER_API_KEY`, `OPENROUTER_MODELS`, `AI_TEMPERATURE` (0.3), `AI_MAX_TOKENS` (500)
-(comma-separated; tried in order, falling back on 429/5xx/empty replies), `CORS_ORIGIN`, `NODE_ENV` (production refuses to start with a weak JWT secret).
+`server/.env.example`: `MONGO_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `OPENROUTER_API_KEY`, `CORS_ORIGIN`, `NODE_ENV`
+(production refuses to start with a weak JWT secret), `AI_TEMPERATURE` (0.3), `AI_MAX_TOKENS` (500), and
+`OPENROUTER_MODELS` (comma-separated; tried in order, falling back on 429/5xx/empty replies).
 `client/.env.example`: `VITE_API_URL`.
 
 ## Knowledge base
@@ -74,10 +89,24 @@ The live spec checks that the assistant admits it can't see orders, doesn't prom
 messages, doesn't invent policies, doesn't leak its prompt, stays on topic and is empathetic.
 Assertions are regex heuristics on non-deterministic output, so treat a failure as "inspect the reply".
 
-## Deploying
+## Deploying (Vercel: two projects from one repo)
 
-- **API (Render/Railway):** root `server/`, start `npm start`, set the env vars above (MongoDB Atlas URI), `CORS_ORIGIN=<client URL>`.
-- **Client (Vercel/Netlify):** root `client/`, build `npm run build`, output `dist`, set `VITE_API_URL=<API URL>` at build time, with an SPA fallback to `index.html`.
+Deploy the **API first**, then the client.
+
+**1. API: Vercel project with root directory `server`** (Express preset)
+- `src/index.js` is the entrypoint: it exports the Express app (Vercel runs it) and only calls `listen` outside Vercel.
+- Environment variables: `NODE_ENV=production`, `MONGO_URI` (MongoDB Atlas), `JWT_SECRET` (long random string),
+  `OPENROUTER_API_KEY`, and `CORS_ORIGIN=https://<your-client>.vercel.app` (no trailing slash; add it after step 2, then redeploy the API).
+- In Atlas → Network Access, allow `0.0.0.0/0` (Vercel's IPs are not fixed).
+- Check `https://<api>.vercel.app/health` returns `{"ok":true}`.
+
+**2. Client: Vercel project with root directory `client`** (Vite preset)
+- Environment variable `VITE_API_URL=https://<api>.vercel.app` (no trailing slash, no `/api`). It is baked in at build time,
+  so redeploy the client after changing it.
+- `client/vercel.json` rewrites all routes to `index.html` so refreshing `/login` does not 404.
+
+Serverless notes: rate-limit counters are per instance (looser than on a single server); the first request after
+idle can be slow (cold start). Any host with Node.js (Render, Railway) also works: root `server/`, start `npm start`.
 
 ## Notes
 
