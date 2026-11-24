@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { config } from './config.js';
-import { createApp } from './app.js';
+import { createApp } from './createApp.js';
 
 // One shared connection promise: reused across requests (and across warm serverless invocations).
 let connecting;

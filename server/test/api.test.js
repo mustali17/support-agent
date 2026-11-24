@@ -19,7 +19,7 @@ const send = (token, message, conversationId) =>
 before(async () => {
   mongod = await MongoMemoryServer.create();
   await mongoose.connect(mongod.getUri());
-  ({ createApp: globalThis._c } = await import('../src/app.js'));
+  ({ createApp: globalThis._c } = await import('../src/createApp.js'));
   app = globalThis._c({ rateLimits: false });
   User = (await import('../src/models/User.js')).default;
   Conversation = (await import('../src/models/Conversation.js')).default;
