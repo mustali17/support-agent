@@ -1,0 +1,25 @@
+{
+  "name": "support-agent-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test --test-reporter=spec --test-concurrency=1 test/api.test.js test/ai.test.js",
+    "test:live": "RUN_LIVE_AI=1 node --env-file=.env --test --test-reporter=spec test/live-ai.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.4.0",
+    "supertest": "^7.3.2"
+  }
+}

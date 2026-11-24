@@ -1,0 +1,19 @@
+services:
+  server:
+    build: ./server
+    restart: unless-stopped
+    env_file:
+      - ./server/.env   # MONGO_URI here should point to MongoDB Atlas
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+    ports:
+      - "5000:5000"
+
+  client:
+    build: ./client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "3000:80"
